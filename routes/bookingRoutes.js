@@ -2,6 +2,8 @@ const express = require("express");
 const BookingRouter = express.Router();
 const {auth} = require("../middleware/auth");
 const BookingModel = require("../models/BookingModel");
+const FlightModel = require("../models/FlightModel");
+const UserModel = require("../models/UserModel");
 
 // ------------Add booking---------------
 BookingRouter.post("/api/booking",auth, async(req,res)=>{
@@ -19,7 +21,7 @@ BookingRouter.post("/api/booking",auth, async(req,res)=>{
 // ------------Get all Booking----------------
 BookingRouter.get("/api/dashboard",auth, async(req,res)=>{
     try {
-        const bookings = BookingModel.find()
+        const bookings = await BookingModel.find({ user: req.user }).populate('user flight');
         res.status(200).json({bookings})
     } catch (error) {
         console.log(error);
@@ -40,7 +42,7 @@ BookingRouter.put("/api/dashboard/:id",auth, async(req,res)=>{
 })
 
 // ------------Delete Boooking's Data-------------------
-BookingRouter.put("/api/dashboard/:id",auth, async(req,res)=>{
+BookingRouter.delete("/api/dashboard/:id",auth, async(req,res)=>{
     try {
         const Booking = await BookingModel.findByIdAndDelete(req.params.id);
         if(!Booking) return res.status(404).json({"message":"Booking not found"})
